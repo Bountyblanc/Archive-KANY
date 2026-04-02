@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KANY — Expérience Scroll</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;
+  overflow-x:hidden;
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  color:#fff;
+  background:#000;
+}
+
+/* ---------- HEADER ---------- */
+.header{
+  position:fixed;
+  top:15px;
+  left:0;right:0;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 60px;
+  opacity:0;
+  transform:translateY(-20px) scale(0.97);
+  transition:opacity .6s cubic-bezier(0.19,1,0.22,1),
+             transform .6s cubic-bezier(0.19,1,0.22,1);
+}
+.header.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  margin-left:40px;
+  opacity:0;
+  transform:translateY(-10px) scale(0.9);
+  transition:opacity .4s ease, transform .4s ease;
+}
+.header.show .logo{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition-delay:.1s;
+}
+.logo img{
+  height:130px;
+  width:auto;
+  display:block;
+  object-fit:contain;
+  transition:filter .3s ease, transform .3s ease;
+  cursor:pointer;
+}
+.logo img:hover{
+  filter:drop-shadow(0 0 6px rgba(255,255,255,0.35));
+  transform:scale(1.05);
+}
+
+.center-title{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Anton', sans-serif;
+  font-weight:700;
+  font-size:clamp(20px,3vw,36px);
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  line-height:1;
+  background:linear-gradient(90deg,#fff,#d0d0d0);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  opacity:0;
+  white-space:nowrap;
+}
+.header.show .center-title{
+  opacity:1;
+  transition:opacity .4s ease;
+  transition-delay:.4s;
+}
+.typing{
+  border-right:2px solid #fff;
+  animation:blink 0.7s steps(1) infinite;
+}
+@keyframes blink{
+  50%{border-color:transparent;}
+}
+
+.cta{
+  padding:10px 20px;
+  border-radius:999px;
+  background:#fff;
+  color:#000;
+  font-weight:700;
+  text-decoration:none;
+  box-shadow:0 6px 25px rgba(0,0,0,.2);
+  transition:transform .3s ease, box-shadow .3s ease, opacity .3s ease;
+  margin-right:20px;
+  opacity:0;
+  transform:translateY(-6px);
+}
+.header.show .cta{
+  opacity:1;
+  transform:translateY(0);
+  transition-delay:.8s;
+}
+.cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+/* ---------- BANDEAU ---------- */
+.scroll-text{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.scroll-text span{
+  font-size:20vw;
+  font-weight:900;
+  letter-spacing:.02em;
+  opacity:.07;
+  white-space:nowrap;
+  animation:marquee 40s linear infinite;
+}
+@keyframes marquee{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
+/* ---------- SECTIONS ---------- */
+section{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14vw 8vw 8vw;
+  position:relative;
+  z-index:2;
+}
+.section-2{
+  z-index:6;
+}
+
+.text-content{
+  position:relative;
+  z-index:4;
+  max-width:560px;
+  transition: all 0.6s cubic-bezier(0.19,1,0.22,1);
+  opacity: 1;
+  transform: translateX(0);
+}
+
+h2{
+  font-size:clamp(28px,4vw,46px);
+  margin-bottom:.6rem;
+}
+
+p{
+  font-size:1.15rem;
+  line-height:1.9rem;
+}
+
+/* Positionnement des sections */
+.section-1 .text-content { margin-right:auto; }
+.section-2 .text-content { margin-left:auto; }
+.section-3 .text-content { margin-right:auto; }
+
+/* Textes cachés par défaut */
+.section-2 .text-content,
+.section-3 .text-content {
+  opacity: 0;
+  transform: translateX(50px);
+}
+
+/* Textes visibles */
+.section-1.active .text-content,
+.section-2.active .text-content,
+.section-3.active .text-content {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.3s;
+}
+
+/* ---------- IMAGE GROUPE ---------- */
+.group-image-container{
+  position:absolute;
+  top:50%;
+  left:8vw;
+  transform:translateY(-50%);
+  width:55vw;
+  max-width:750px;
+  opacity:0;
+  transition:opacity 0.8s ease;
+  z-index:5;
+}
+.section-2.active .group-image-container{
+  opacity:1;
+}
+.group-image{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+/* ---------- LABELS PERSONNAGES ---------- */
+.arrow-container{
+  position:absolute;
+  transform:translate(-50%, -100%);
+  opacity:0;
+  transition:opacity .6s ease;
+  pointer-events:none;
+  z-index:20;
+  padding:8px 18px;
+  border-radius:999px;
+  background:rgba(0,0,0,0.65);
+  box-shadow:0 6px 18px rgba(0,0,0,0.35);
+}
+
+.section-2.active .arrow-container{
+  opacity:1;
+  transition-delay:.4s;
+}
+
+.character-label{
+  color:#fff;
+  font-weight:600;
+  font-size:clamp(16px,1.8vw,22px);
+  white-space:nowrap;
+  opacity:0;
+  animation:fadeInLabel .6s ease forwards;
+  animation-delay:.4s;
+  text-shadow:0 2px 4px rgba(0,0,0,0.5);
+}
+
+@keyframes fadeInLabel{
+  from{opacity:0; transform:translateY(-8px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* ---- POSITIONS ---- */
+.arrow-kiwi{
+  top:-24%;
+  left:10%;
+}
+
+.arrow-acai{
+  top:-24%;
+  left:30%;
+}
+
+.arrow-nectarine{
+  top:-24%;
+  left:50%;
+}
+
+.arrow-yuzu{
+  top:-24%;
+  left:72%;
+}
+
+/* ---------- CANVAS ---------- */
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  pointer-events:none;
+  transition:z-index .3s ease, opacity .5s ease, filter .5s ease;
+  opacity:1;
+  filter:blur(0);
+}
+canvas.in-front{
+  z-index:3;
+}
+canvas.behind-group{
+  opacity:.4;
+  filter:blur(8px);
+}
+
+/* ---------- FLÈCHES DE NAVIGATION (FIX CLICK BUG) ---------- */
+.nav-arrow{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:9999 !important;
+  pointer-events:auto !important;
+  transition:.3s;
+  opacity:.7;
+  border:1px solid rgba(255,255,255,0.2);
+}
+.nav-arrow:hover{
+  opacity:1;
+  background:rgba(255,255,255,0.15);
+  transform:translateY(-50%) scale(1.1);
+}
+.nav-left{ left:20px; }
+.nav-right{ right:20px; }
+
+.nav-arrow svg{
+  width:24px;
+  height:24px;
+  opacity:0.9;
+}
+
+/* ---------- FADE ---------- */
+.fade{
+  position:fixed;
+  inset:0;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  z-index:10;
+  transition:opacity .35s ease;
+}
+.fade.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* ---------- DEBUG ---------- */
+.debug{
+  position:fixed;
+  top:10px;
+  left:10px;
+  background:rgba(0,0,0,0.8);
+  color:white;
+  padding:10px;
+  z-index:100;
+  font-size:12px;
+}
+</style>
+</head>
+<body>
+
+  <div id="fade" class="fade"></div>
+  <div id="debug" class="debug"></div>
+
+  <header class="header" id="mainHeader">
+    <div class="logo">
+      <img src="img/logokany.png" alt="Logo KANY" id="logoBtn"/>
+    </div>
+    <div id="centerTitle" class="center-title"></div>
+    <a id="aboutBtn" class="cta" href="/notre-histoire">Notre histoire</a>
+  </header>
+
+  <!-- FLÈCHES DE NAVIGATION -->
+  <div class="nav-arrow nav-left" id="prevBtn">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="nav-arrow nav-right" id="nextBtn">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="scroll-text"><span id="banderol">KANY KANY KANY</span></div>
+
+  <!-- Sections de contenu -->
+  <section class="section-1 active">
+    <div class="text-content">
+      <h2>Présentation</h2>
+      <p id="txt-presentation"></p>
+    </div>
+  </section>
+  
+  <section class="section-2">
+    <div class="text-content">
+      <h2>Personnage</h2>
+      <p id="txt-story"></p>
+    </div>
+    <div class="group-image-container">
+      <img src="img/groupekany.png" alt="Groupe KANY" class="group-image" id="groupImage"/>
+      <div class="arrow-container" id="labelContainer">
+        <div class="character-label" id="characterLabel"></div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="section-3">
+    <div class="text-content">
+      <h2>Ingrédients</h2>
+      <p id="txt-ingredients"></p>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script>
+    const bottlesOrder = ["yuzu","acai","kiwi","nectarine"];
+    const bottlesData = {
+      yuzu:{
+        key:"YUZU MIEL", display:"Yuzu·Miel", color:"#E7A92D",
+        background:"linear-gradient(to right,#d98a15,#f8d77a)",
+        banderol:"#b8731b", speed:"40s",
+        presentation:"Rafraîchissez votre énergie naturelle avec KANY Yuzu Miel, une boisson à base d'agrumes japonais et de miel doré. Source de vitalité, riche en arômes et 100 % naturelle. Fabriquée en France – Embouteillée avec amour.",
+        story:"La boisson Yuzu Miel est associée à Yassine, le mec chill et posé du groupe. Calme et réfléchi, il incarne la sérénité dorée et l'équilibre du Yuzu.",
+        ingredients:"Eau filtrée, jus de yuzu (10%), miel (2%), infusion de menthe douce (6%), jus de raisin concentré, jus de citron, sucre de canne.",
+        character:"Yassine, le mec chill",
+        labelClass:"arrow-yuzu"
+      },
+      acai:{
+        key:"AÇAÏ HIBISCUS", display:"Açaï·Hibiscus", color:"#B44B9A",
+        background:"linear-gradient(to right,#5e1d65,#ff8ad1)",
+        banderol:"#ffc2e4", speed:"40s",
+        presentation:"Rafraîchissez votre énergie naturelle avec KANY Açaï Hibiscus, une boisson à base de superfruits et de fleurs tropicales. Source d'antioxydants, riche en saveurs et 100 % naturelle.",
+        story:"La boisson Açaï Hibiscus est associée à Alexis, le sociable du groupe. Toujours souriant et ouvert, il reflète la fraîcheur et la douceur vibrante de l'açaï et de l'hibiscus.",
+        ingredients:"Eau filtrée, purée d'açaï (10%), infusion d'hibiscus (8%), jus de myrtille, jus de raisin, sirop d'agave.",
+        character:"Alexis, le sociable",
+        labelClass:"arrow-acai"
+      },
+      kiwi:{
+        key:"KIWI FRAISE", display:"Kiwi·Fraise", color:"#7dd86f",
+        background:"linear-gradient(to right,#55b64d,#ff8a9b)",
+        banderol:"#e5ffd4", speed:"40s",
+        presentation:"Rafraîchissez votre énergie naturelle avec KANY Kiwi Fraise, une boisson à base de fruits frais et de saveurs acidulées. Source de vitamine C, riche en goût et 100 % naturelle.",
+        story:"La boisson Kiwi Fraise est associée à Khalid, l'extraverti du groupe. Solaire, drôle et toujours en mouvement, il incarne l'énergie fruitée et joyeuse de Kiwi Fraise.",
+        ingredients:"Eau filtrée, jus de kiwi (8%), jus de fraise (7%), infusion de thé vert, jus de pomme, citron.",
+        character:"Khalid, l'extraverti",
+        labelClass:"arrow-kiwi"
+      },
+      nectarine:{
+        key:"NECTARINE ANANAS", display:"Nectarine·Ananas", color:"#ff9240",
+        background:"linear-gradient(to right,#ff7a00,#ffc04b)",
+        banderol:"#ffd8a0", speed:"60s",
+        presentation:"Rafraîchissez votre énergie naturelle avec KANY Nectarine Ananas, une boisson à base de fruits du soleil et de douceur tropicale.",
+        story:"La boisson Nectarine Ananas est associée à Noam, le fou du groupe. Spontané, imprévisible et solaire, il incarne l'énergie explosive et tropicale de cette boisson.",
+        ingredients:"Eau filtrée, jus de nectarine (10%), jus d'ananas (8%), infusion de thé blanc, sucre de canne, citron.",
+        character:"Noam, le fou",
+        labelClass:"arrow-nectarine"
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const id = (params.get("id") || "yuzu").toLowerCase();
+    const data = bottlesData[id] || bottlesData.yuzu;
+
+    document.body.style.background = data.background;
+    const banderol = document.getElementById("banderol");
+    banderol.textContent = `${data.key} `.repeat(15);
+    banderol.style.color = data.banderol;
+    banderol.style.opacity = "0.14";
+
+    document.getElementById("txt-presentation").textContent = data.presentation;
+    document.getElementById("txt-story").textContent = data.story;
+    document.getElementById("txt-ingredients").textContent = data.ingredients;
+
+    // Label unique positionné sur le bon personnage
+    const labelContainer = document.getElementById("labelContainer");
+    const characterLabel = document.getElementById("characterLabel");
+    if (labelContainer && characterLabel) {
+      labelContainer.className = `arrow-container ${data.labelClass}`;
+      characterLabel.textContent = data.character;
+    }
+
+    const titleEl = document.getElementById("centerTitle");
+    function typeText(text, delay=60){
+      titleEl.textContent = "";
+      titleEl.classList.add("typing");
+      let i = 0;
+      const interval = setInterval(()=>{
+        titleEl.textContent = text.slice(0, i++);
+        if(i > text.length){
+          clearInterval(interval);
+          titleEl.classList.remove("typing");
+        }
+      }, delay);
+    }
+
+    window.addEventListener("load", ()=>{
+      setTimeout(()=>document.getElementById("mainHeader").classList.add("show"),100);
+      setTimeout(()=>typeText(data.display),700);
+    });
+
+    document.getElementById("logoBtn").addEventListener("click",()=>{
+      window.location.href="animationv2.html";
+    });
+
+    // Configuration Three.js (ORIGINALE)
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(2);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.physicallyCorrectLights = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.6;
+    document.body.appendChild(renderer.domElement);
+    
+    // Ajuster z-index et effet visuel du canvas : en arrière-plan pour section 2, au premier plan pour les autres
+    const canvas = renderer.domElement;
+    const section2 = document.querySelector('.section-2');
+    const observerCanvas = new MutationObserver(() => {
+      if (section2 && section2.classList.contains('active')) {
+        canvas.classList.remove('in-front');
+        canvas.classList.add('behind-group');
+      } else {
+        canvas.classList.add('in-front');
+        canvas.classList.remove('behind-group');
+      }
+    });
+    if (section2) {
+      observerCanvas.observe(section2, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+      if (!section2.classList.contains('active')) {
+        canvas.classList.add('in-front');
+        canvas.classList.remove('behind-group');
+      } else {
+        canvas.classList.remove('in-front');
+        canvas.classList.add('behind-group');
+      }
+    }
+
+    // Éclairage (ORIGINAL)
+    const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+    const front = new THREE.DirectionalLight(0xffffff, 2);
+    front.position.set(5, 10, 5);
+    const back = new THREE.DirectionalLight(0xffffff, 1);
+    back.position.set(-5, 5, -5);
+    const colorLight = new THREE.PointLight(data.color, 2, 50);
+    colorLight.position.set(0, 10, 5);
+    scene.add(ambient, front, back, colorLight);
+
+    let bottle;
+    const loader = new THREE.GLTFLoader();
+    
+    // Variables de contrôle du mouvement
+    let isMoving = false;
+    let moveProgress = 0;
+    let moveDuration = 3.5;
+    let currentSection = 0;
+    
+    // Positions avec inclinaisons (ORIGINALES)
+    const sectionPositions = [
+      { 
+        x: 3, 
+        y: -1,
+        rotationZ: -0.2,
+        rotationY: 0.3
+      },
+      { 
+        x: -3, 
+        y: -1,
+        rotationZ: 0.2,
+        rotationY: -0.3
+      },
+      { 
+        x: 3, 
+        y: -1,
+        rotationZ: -0.2,
+        rotationY: 0.3
+      }
+    ];
+    
+    let startPosition = { x: 3, y: -1, rotationZ: -0.2, rotationY: 0.3 };
+    let targetPosition = { x: 3, y: -1, rotationZ: -0.2, rotationY: 0.3 };
+
+    function updateDebug() {
+      const debug = document.getElementById('debug');
+      if (bottle) {
+        debug.innerHTML = `
+          Position: ${bottle.position.x.toFixed(2)}, ${bottle.position.y.toFixed(2)}<br>
+          Section: ${currentSection + 1}<br>
+          Moving: ${isMoving}
+        `;
+      }
+    }
+
+    loader.load(`bottle/bottle${id}.glb`, gltf => {
+      bottle = gltf.scene;
+      
+      bottle.traverse(c => {
+        if(c.isMesh && c.material && c.material.isMeshStandardMaterial){
+          c.material.roughness = 0.1;
+          c.material.metalness = 0.2;
+          c.material.envMapIntensity = 2;
+          c.material.needsUpdate = true;
+        }
+      });
+      
+      bottle.scale.set(1.1, 1.1, 1.1);
+      bottle.position.set(3, -1, 0);
+      bottle.rotation.z = -0.2;
+      bottle.rotation.y = 0.3;
+      scene.add(bottle);
+
+      console.log('✅ Bouteille chargée avec configuration originale');
+      updateDebug();
+      
+      updateActiveSections();
+
+    }, undefined, (error) => {
+      console.error('❌ Erreur chargement bouteille:', error);
+    });
+
+    camera.position.z = 8;
+    camera.position.y = 2;
+    camera.position.x = 0;
+    camera.lookAt(0, 0, 0);
+
+    function startMoveToSection(sectionIndex) {
+      if (sectionIndex === currentSection || !bottle) return;
+      if (sectionIndex < 0 || sectionIndex >= sectionPositions.length) return;
+      
+      if (isMoving) {
+        startPosition = {
+          x: bottle.position.x,
+          y: bottle.position.y,
+          rotationZ: bottle.rotation.z,
+          rotationY: bottle.rotation.y
+        };
+      }
+      
+      isMoving = true;
+      moveProgress = 0;
+      const previousSection = currentSection;
+      currentSection = sectionIndex;
+      
+      startPosition = {
+        x: bottle.position.x,
+        y: bottle.position.y,
+        rotationZ: bottle.rotation.z,
+        rotationY: bottle.rotation.y
+      };
+      targetPosition = sectionPositions[sectionIndex];
+      
+      console.log(`🚀 Déplacement de section ${previousSection + 1} vers ${sectionIndex + 1}`);
+      updateDebug();
+
+      updateActiveSections();
+    }
+
+    function updateActiveSections() {
+      document.querySelectorAll('section').forEach((section, index) => {
+        if (index === currentSection) {
+          section.classList.add('active');
+        } else {
+          section.classList.remove('active');
+        }
+      });
+    }
+
+    let pendingSectionChange = null;
+    
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && bottle) {
+          const sectionIndex = Array.from(document.querySelectorAll('section')).indexOf(entry.target);
+          if (sectionIndex !== currentSection) {
+            if (pendingSectionChange) {
+              clearTimeout(pendingSectionChange);
+            }
+            pendingSectionChange = setTimeout(() => {
+              startMoveToSection(sectionIndex);
+              pendingSectionChange = null;
+            }, 50);
+          }
+        }
+      });
+    }, { threshold: 0.6 });
+
+    document.querySelectorAll("section").forEach(s => observer.observe(s));
+    
+    updateActiveSections();
+    
+    function syncBottleToCurrentSection() {
+      if (!bottle || isMoving) return;
+      
+      const target = sectionPositions[currentSection];
+      if (target) {
+        const tolerance = 0.1;
+        const xDiff = Math.abs(bottle.position.x - target.x);
+        const yDiff = Math.abs(bottle.position.y - target.y);
+        const zRotDiff = Math.abs(bottle.rotation.z - target.rotationZ);
+        const yRotDiff = Math.abs(bottle.rotation.y - target.rotationY);
+        
+        if (xDiff > tolerance || yDiff > tolerance || zRotDiff > tolerance || yRotDiff > tolerance) {
+          bottle.position.x = target.x;
+          bottle.position.y = target.y;
+          bottle.rotation.z = target.rotationZ;
+          bottle.rotation.y = target.rotationY;
+          console.log('🔧 Bouteille resynchronisée avec la section', currentSection + 1);
+        }
+      }
+    }
+    
+    setInterval(() => {
+      if (bottle && !isMoving) {
+        syncBottleToCurrentSection();
+      }
+    }, 500);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (bottle && isMoving) {
+        moveProgress += 0.016 / moveDuration;
+        
+        if (moveProgress < 1) {
+          const t = easeInOutCubic(moveProgress);
+          
+          bottle.position.x = startPosition.x + (targetPosition.x - startPosition.x) * t;
+          bottle.position.y = startPosition.y + (targetPosition.y - startPosition.y) * t;
+          
+          const distance = targetPosition.x - startPosition.x;
+          bottle.rotation.y = startPosition.rotationY + (Math.PI * 2 * distance / 25) * t;
+          
+          if (moveProgress < 0.5) {
+            bottle.rotation.z = startPosition.rotationZ + (0.4 * Math.sin(moveProgress * Math.PI * 2));
+          } else {
+            bottle.rotation.z = startPosition.rotationZ + (targetPosition.rotationZ - startPosition.rotationZ) * (t - 0.5) * 2;
+          }
+          
+        } else {
+          bottle.position.x = targetPosition.x;
+          bottle.position.y = targetPosition.y;
+          bottle.rotation.z = targetPosition.rotationZ;
+          bottle.rotation.y = targetPosition.rotationY;
+          isMoving = false;
+          console.log('✅ Arrivé à destination avec inclinaison');
+        }
+        
+        updateDebug();
+      }
+      
+      renderer.render(scene, camera);
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const fade = document.getElementById("fade");
+    
+    function goTo(idNext) {
+      fade.classList.add("show");
+      setTimeout(() => {
+        window.location.search = `?id=${encodeURIComponent(idNext)}`;
+      }, 280);
+    }
+    
+    const nextId = () => {
+      const i = bottlesOrder.indexOf(id);
+      return bottlesOrder[(i+1) % bottlesOrder.length];
+    };
+    
+    const prevId = () => {
+      const i = bottlesOrder.indexOf(id);
+      return bottlesOrder[(i-1 + bottlesOrder.length) % bottlesOrder.length];
+    };
+    
+    document.getElementById("nextBtn").addEventListener("click", () => goTo(nextId()));
+    document.getElementById("prevBtn").addEventListener("click", () => goTo(prevId()));
+    
+    window.addEventListener("keydown", e => {
+      if(e.key === "ArrowRight") goTo(nextId());
+      if(e.key === "ArrowLeft") goTo(prevId());
+    });
+
+  </script>
+</body>
+</html>
